@@ -1,9 +1,6 @@
 require 'spec_helper'
+require 'kant/all_access'
 
 describe Kant do
   setup_models
-
-  it "something something" do
-    User.create!(email: 'foo@bar.com')
-  end
 end

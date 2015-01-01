@@ -4,6 +4,7 @@ require 'bundler/setup'
 require 'active_record'
 require 'sqlite3'
 require 'with_model'
+require 'kant/matchers'
 require 'kant'
 
 ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
