@@ -13,6 +13,12 @@ describe Kant::PolicyAccess do
       bell = double("bell")
       expect(bell).to receive(:ring).with(todo, user).and_return(nil)
 
+      # module TodoPolicy
+      #   def self.can_tickle?(todo, user)
+      #     bell.ring(todo, user)
+      #     "foo"
+      #   end
+      # end
       todo_policy = Class.new do
         define_singleton_method(:can_tickle?) do |todo, user|
           bell.ring(todo, user)
@@ -39,6 +45,11 @@ describe Kant::PolicyAccess do
     end
 
     it "uses an *able scope method if no can_*? method exists" do
+      # module TodoPolicy
+      #   def self.readable(todos, user)
+      #     todos.where(completed: true)
+      #   end
+      # end
       todo_policy = Class.new do
         define_singleton_method(:readable) do |todos, user|
           todos.where(completed: true)
@@ -63,6 +74,11 @@ describe Kant::PolicyAccess do
     subject(:policy_access) { Kant::PolicyAccess.new(user) }
 
     it "delegates to a Policy module" do
+      # module TodoPolicy
+      #   def self.readable(todos, user)
+      #     todos.where(completed: true)
+      #   end
+      # end
       todo_policy = Class.new do
         define_singleton_method(:readable) do |todos, user|
           todos.where(completed: true)
@@ -76,6 +92,15 @@ describe Kant::PolicyAccess do
 
       expect(policy_access.accessible(:read, Todo)).to eq([complete_todo])
       expect(policy_access.accessible(:read, Todo.where(completed: false))).to eq([])
+    end
+
+    it "returns an empty scope when no scope method is defined" do
+      stub_const("TodoPolicy", Class.new)
+
+      complete_todo = Todo.create!(completed: true)
+      incomplete_todo = Todo.create!(completed: false)
+
+      expect(policy_access.accessible(:read, Todo)).to eq(Todo.none)
     end
   end
 end
