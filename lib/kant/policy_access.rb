@@ -1,5 +1,9 @@
+require 'kant/resolvers/active_record'
+
 module Kant
   class PolicyAccess
+    include Kant::Resolvers::ActiveRecord
+
     attr_accessor :user
 
     def initialize(user)
@@ -59,20 +63,6 @@ module Kant
       else
         nil
       end
-    end
-
-    def resolve_object(object)
-      resolve(object.class.name)
-    end
-
-    def resolve_scope(scope)
-      resolve(scope.all.model.name)
-    end
-
-    def resolve(name)
-      "#{name}Policy".constantize
-    rescue NameError
-      nil
     end
   end
 end
