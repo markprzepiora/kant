@@ -57,4 +57,25 @@ describe Kant::PolicyAccess do
       expect(policy_access).not_to be_able_to(:tickle, incomplete_todo)
     end
   end
+
+  describe "#accessible" do
+    let(:user) { User.create!(email: 'foo@bar.com') }
+    subject(:policy_access) { Kant::PolicyAccess.new(user) }
+
+    it "delegates to a Policy module" do
+      todo_policy = Class.new do
+        define_singleton_method(:readable) do |todos, user|
+          todos.where(completed: true)
+        end
+      end
+
+      stub_const("TodoPolicy", todo_policy)
+
+      complete_todo = Todo.create!(completed: true)
+      incomplete_todo = Todo.create!(completed: false)
+
+      expect(policy_access.accessible(:read, Todo)).to eq([complete_todo])
+      expect(policy_access.accessible(:read, Todo.where(completed: false))).to eq([])
+    end
+  end
 end
