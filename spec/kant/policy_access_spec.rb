@@ -37,5 +37,24 @@ describe Kant::PolicyAccess do
       todo = Todo.create
       expect(policy_access.can?(:tickle, todo)).to eq(false)
     end
+
+    it "uses an *able scope method if no can_*? method exists" do
+      todo_policy = Class.new do
+        define_singleton_method(:readable) do |todos, user|
+          todos.where(completed: true)
+        end
+      end
+
+      stub_const("TodoPolicy", todo_policy)
+
+      complete_todo = Todo.create!(completed: true)
+      incomplete_todo = Todo.create!(completed: false)
+
+      expect(policy_access).to be_able_to(:read, complete_todo)
+      expect(policy_access).not_to be_able_to(:read, incomplete_todo)
+
+      expect(policy_access).not_to be_able_to(:tickle, complete_todo)
+      expect(policy_access).not_to be_able_to(:tickle, incomplete_todo)
+    end
   end
 end
