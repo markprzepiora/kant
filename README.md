@@ -1,5 +1,8 @@
 # Kant
 
+Kant is a tiny authorization library for your Ruby (especially Rails and/or
+ActiveRecord) projects.
+
 ## Overview
 
 ### What Kant does NOT do:
@@ -8,6 +11,8 @@
 - Add any magic methods to your controllers that fetch your data for you, or
   make any assumptions about how you want to do this.
 - Force you to redefine your authorization logic on every single request.
+- Depend on Rails/ActiveRecord--but if you do use these, there's a tiny bit of
+  magic available to you if you want to use it.
 
 ### What Kant does:
 
@@ -55,7 +60,7 @@ it certainly doesn't require Rails at all.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'kant'
+gem 'kant', require: false
 ```
 
 And then execute:
@@ -257,7 +262,7 @@ else
 end
 ```
 
-## Example
+## Complete-ish Example
 
 ```ruby
 # config/application.rb
@@ -267,9 +272,21 @@ end
 
 # app/controllers/application_controller.rb
 require 'kant/controller_mixin'
+require 'kant/no_access'
+require 'kant/all_access'
 
 class ApplicationController < ActionController::Base
   include Kant::ControllerMixin
+
+  def current_access_control
+    if !current_user
+      NoAccess.new(nil)
+    elsif current_user.admin?
+      AllAccess.new(nil)
+    else
+      AccessControl.new(current_user)
+    end
+  end
 end
 
 # app/authorization/access_control.rb
