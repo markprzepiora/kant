@@ -78,6 +78,18 @@ ApplicationController if you wish. It adds a couple of methods:
   no-op if `can?` returns true, but raising a `Kant::AccessDenied` exception if
   `can?` returns false.
 
+Be sure to require what you need! Example:
+
+```ruby
+require 'kant/controller_mixin'
+
+class ApplicationController < ActionController::Base
+  include Kant::ControllerMixin
+
+  # ...
+end
+```
+
 ### Basic All or Nothing Access Controls
 
 If you are using ActiveRecord, Kant provides `Kant::AllAccess` and
@@ -244,6 +256,55 @@ else
   # ...
 end
 ```
+
+## Example
+
+```ruby
+# config/application.rb
+# ...
+  config.autoload_paths += %W(#{config.root}/authorization)
+# ...
+
+# app/controllers/application_controller.rb
+require 'kant/controller_mixin'
+
+class ApplicationController < ActionController::Base
+  include Kant::ControllerMixin
+end
+
+# app/authorization/access_control.rb
+require 'kant/policy_access'
+
+class AccessControl < Kant::PolicyAccess
+  def policies_module
+    ::Policies
+  end
+end
+
+# app/authorization/policies/foo_policy.rb
+module Policies
+  module FooPolicy
+    def readable(foos, user)
+      foos.where(user_id: user.id)
+    end
+  end
+end
+
+# app/controllers/foos_controller.rb
+class FoosController < ApplicationController
+  def index
+    foos = accessible(:read, Foo)
+    render json: foos
+  end
+
+  def show
+    foo = Foo.find(params[:id])
+    authorize! :read, foo
+    render json: foo
+  end
+end
+```
+
 
 ## Contributing
 
