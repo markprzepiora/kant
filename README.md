@@ -312,6 +312,24 @@ class FoosController < ApplicationController
 end
 ```
 
+## RSpec
+
+Kant has RSpec matchers if you want to use them. Example:
+
+```ruby
+# spec_helper.rb
+require 'kant/rspec/matchers'
+
+# foo_spec.rb
+describe Foo
+  it "bars" do
+    # ... some setup ...
+    access_control = AccessControl.new(user)
+    expect(access_control).to be_able_to(:read, foo)
+  end
+end
+```
+
 
 ## Contributing
 
