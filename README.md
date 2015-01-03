@@ -271,10 +271,7 @@ end
 # ...
 
 # app/controllers/application_controller.rb
-require 'kant/controller_mixin'
-require 'kant/no_access'
-require 'kant/all_access'
-require 'kant/policy_access'
+require 'kant/all'
 
 class ApplicationController < ActionController::Base
   include Kant::ControllerMixin
