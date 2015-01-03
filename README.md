@@ -177,8 +177,10 @@ module FooPolicy
     foo.owner_id == user.id
   end
 
-  alias_method :can_update?, :can_read?
-  alias_method :can_destroy?, :can_read?
+  class << self
+    alias_method :can_update?, :can_read?
+    alias_method :can_destroy?, :can_read?
+  end
 end
 ```
 
