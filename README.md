@@ -202,6 +202,48 @@ This way, in your `can_update?` policy you can check foo's `#changes`, etc.,
 methods to see what was changed in case a user might only be allowed to modify
 some fields but not others, or only make certain kinds of changes.
 
+### DRYing Up Your Controllers
+
+You might be worried about missing out on CanCan's magical controller methods
+that fetch and authorize your records for you.
+
+But why not instead just define a method like this in `ApplicationController`?
+
+```ruby
+def find_and_authorize(model_class, id, action)
+  record = model_class.find(id)
+  authorize! action, record
+  record
+end
+```
+
+Now you can just,
+
+```ruby
+foo = find_and_authorize(Foo, params[:id], :read)
+```
+
+You could define something analogous for updating and creating records,
+
+```ruby
+def authorize_and_create(model_class, params)
+  record = model_class.new(params)
+  authorize! :create, record
+  [record.save, record]
+end
+```
+
+And in your actions use,
+
+```ruby
+success, foo = authorize_and_create(Foo, create_params)
+
+if success
+  # ...
+else
+  # ...
+end
+```
 
 ## Contributing
 
