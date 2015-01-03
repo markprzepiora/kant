@@ -104,7 +104,7 @@ describe Kant::PolicyAccess do
     end
   end
 
-  describe "#policies_module" do
+  describe "the policies_module option in initializer" do
     let(:user) { User.create!(email: 'foo@bar.com') }
 
     it "can be specified to namespace policies" do
@@ -122,13 +122,7 @@ describe Kant::PolicyAccess do
       stub_const("Policies", Module.new)
       stub_const("Policies::TodoPolicy", todo_policy)
 
-      custom_policy_access_class = Class.new(Kant::PolicyAccess) do
-        def policies_module
-          ::Policies
-        end
-      end
-
-      policy_access = custom_policy_access_class.new(user)
+      policy_access = Kant::PolicyAccess.new(user, policies_module: Policies)
 
       complete_todo = Todo.create!(completed: true)
       incomplete_todo = Todo.create!(completed: false)

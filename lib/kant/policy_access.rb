@@ -6,8 +6,9 @@ module Kant
 
     attr_accessor :user
 
-    def initialize(user)
+    def initialize(user, policies_module: nil)
       @user = user
+      @policies_module = policies_module || Kernel
     end
 
     # Delegates to an appropriate Policy module. For example,

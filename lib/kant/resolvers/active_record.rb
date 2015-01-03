@@ -3,9 +3,7 @@ module Kant
     module ActiveRecord
       private
 
-      def policies_module
-        Kernel
-      end
+      attr_reader :policies_module
 
       def resolve_object(object)
         resolve(object.class.name)

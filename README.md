@@ -274,27 +274,19 @@ end
 require 'kant/controller_mixin'
 require 'kant/no_access'
 require 'kant/all_access'
+require 'kant/policy_access'
 
 class ApplicationController < ActionController::Base
   include Kant::ControllerMixin
 
   def current_access_control
     if !current_user
-      NoAccess.new(nil)
+      Kant::NoAccess.new(nil)
     elsif current_user.admin?
-      AllAccess.new(nil)
+      Kant::AllAccess.new(nil)
     else
-      AccessControl.new(current_user)
+      Kant::PolicyAccess.new(current_user, policies_module: Policies)
     end
-  end
-end
-
-# app/authorization/access_control.rb
-require 'kant/policy_access'
-
-class AccessControl < Kant::PolicyAccess
-  def policies_module
-    ::Policies
   end
 end
 
