@@ -3,6 +3,10 @@ module Kant
     module ActiveRecord
       private
 
+      def policies_module
+        Kernel
+      end
+
       def resolve_object(object)
         resolve(object.class.name)
       end
@@ -12,7 +16,7 @@ module Kant
       end
 
       def resolve(name)
-        "#{name}Policy".constantize
+        policies_module.const_get("#{name}Policy")
       rescue NameError
         nil
       end

@@ -103,4 +103,37 @@ describe Kant::PolicyAccess do
       expect(policy_access.accessible(:read, Todo)).to eq(Todo.none)
     end
   end
+
+  describe "#policies_module" do
+    let(:user) { User.create!(email: 'foo@bar.com') }
+
+    it "can be specified to namespace policies" do
+      # module Policies::TodoPolicy
+      #   def self.readable(todos, user)
+      #     todos.where(completed: true)
+      #   end
+      # end
+      todo_policy = Class.new do
+        define_singleton_method(:readable) do |todos, user|
+          todos.where(completed: true)
+        end
+      end
+
+      stub_const("Policies", Module.new)
+      stub_const("Policies::TodoPolicy", todo_policy)
+
+      custom_policy_access_class = Class.new(Kant::PolicyAccess) do
+        def policies_module
+          ::Policies
+        end
+      end
+
+      policy_access = custom_policy_access_class.new(user)
+
+      complete_todo = Todo.create!(completed: true)
+      incomplete_todo = Todo.create!(completed: false)
+
+      expect(policy_access.accessible(:read, Todo)).to eq([complete_todo])
+    end
+  end
 end
