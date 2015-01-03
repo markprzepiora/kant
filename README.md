@@ -301,7 +301,7 @@ end
 # app/authorization/policies/foo_policy.rb
 module Policies
   module FooPolicy
-    def readable(foos, user)
+    def self.readable(foos, user)
       foos.where(user_id: user.id)
     end
   end
