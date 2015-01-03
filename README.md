@@ -75,9 +75,10 @@ Kant provides a `Kant::ControllerMixin` module that you can include in your
 ApplicationController if you wish. It adds a couple of methods:
 
 - A `current_access_control` method, which simply returns
-  `AccessControl.new(current_user)`. You can override this if you need to, for
-  example, choose which access control class to use based on the current user's
-  role. See the source code for an example.
+  `AccessControl.new(current_user)` (a class which are you are expected to
+  provide). You can override this if you need to, for example, choose which
+  access control class to use based on the current user's role. See the source
+  code for an example.
 - It delegtes `can?(...)` and `accessible(...)` to `current_access_control`.
 - It adds an `authorize!(...)` method, which delegates to `can?(...)`, being a
   no-op if `can?` returns true, but raising a `Kant::AccessDenied` exception if
