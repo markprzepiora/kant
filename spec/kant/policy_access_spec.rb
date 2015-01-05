@@ -32,6 +32,28 @@ describe Kant::PolicyAccess do
       expect(policy_access.can?(:read, todo)).to eq(false)
     end
 
+    it "uses FooPolicy to authorize Foo itself" do
+      bell = double("bell")
+      expect(bell).to receive(:ring).with(Todo, user).and_return(nil)
+
+      # module TodoPolicy
+      #   def self.can_tickle?(todo, user)
+      #     bell.ring(todo, user)
+      #     "foo"
+      #   end
+      # end
+      todo_policy = Class.new do
+        define_singleton_method(:can_tickle?) do |todo, user|
+          bell.ring(todo, user)
+          "foo"
+        end
+      end
+
+      stub_const("TodoPolicy", todo_policy)
+
+      expect(policy_access.can?(:tickle, Todo)).to eq("foo")
+    end
+
     it "returns false for an undefined action" do
       todo = Todo.create
       stub_const("TodoPolicy", Class.new)

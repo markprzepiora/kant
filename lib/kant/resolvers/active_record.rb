@@ -5,8 +5,15 @@ module Kant
 
       attr_reader :policies_module
 
-      def resolve_object(object)
-        resolve(object.class.name)
+      def resolve_object(object_or_class)
+        klass =
+          if object_or_class.is_a?(Class)
+            object_or_class
+          else
+            object_or_class.class
+          end
+
+        resolve(klass.name)
       end
 
       def resolve_scope(scope)
