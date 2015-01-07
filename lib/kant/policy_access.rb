@@ -26,7 +26,7 @@ module Kant
 
       if abilities.respond_to?(method_eh)
         abilities.send(method_eh, object, user)
-      elsif _scope_method.present? && object.id.present?
+      elsif _scope_method && object.id
         abilities.send(_scope_method, model_class, user).where(id: object.id).any?
       else
         false
@@ -41,7 +41,7 @@ module Kant
       abilities = resolve_scope(scope)
       _scope_method = scope_method(abilities, action)
 
-      if _scope_method.present?
+      if _scope_method
         abilities.send(_scope_method, scope, user)
       else
         scope.none
