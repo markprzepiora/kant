@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Kant::VERSION
   spec.authors       = ["Mark Przepiora"]
   spec.email         = ["mark.przepiora@gmail.com"]
-  spec.summary       = %q{Non-magical authorization for Rails}
-  spec.description   = %q{...}
-  spec.homepage      = ""
+  spec.summary       = %q{A tiny, non-magical authorization library}
+  spec.description   = %q{Kant is a tiny authorization library for your Ruby (especially Rails and/or ActiveRecord) projects.}
+  spec.homepage      = "https://github.com/markprzepiora/kant"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
