@@ -1,4 +1,4 @@
-# Kant v0.0.1
+# Kant v0.0.2
 
 Kant is a tiny authorization library for your Ruby (especially Rails and/or
 ActiveRecord) projects.
@@ -332,10 +332,70 @@ describe Foo
 end
 ```
 
-## But Is It Good?
+## But is it good?
 
-It's small, simple, and it works. So maybe?
+It's small, simple, and it works. I use it in production. So maybe?
 
+## Why should I use this instead of CanCan?
+
+First of all, this library is tiny.
+
+```bash
+$ cat lib/kant/**/*.rb | wc -l
+212
+```
+
+And this includes the RSpec matcher definition which you won't even use in
+production. Excluding that, Kant is about 170 lines of code.
+
+Compare this to CanCanCan:
+
+```bash
+$ cat lib/**/*.rb | wc -l
+1849
+```
+
+Also, it's fast:
+
+**Warning: Do not trust these benchmarks. Perform your own measurements on your
+own application.**
+
+A problem with CanCan as your application grows is that it expects you to
+define *all* of your abilities upon initialization, even if the request only
+checks a single one. This is fine if you only have a couple of models, or if
+your scopes are simple, but if your application has a couple dozen models, this
+can translate into a significant overhead.
+
+Here is a simple benchmark I executed on production when we still used CanCan:
+
+```ruby
+require 'benchmark'
+u = User.first
+
+puts Benchmark.measure {
+  10000.times { Ability.new(u) }
+}
+# => 48.510000   0.990000  49.500000 ( 70.699697)
+```
+
+That's almost 50 seconds of CPU time simply to instantiate 10,000 objects.
+
+Here is the benchmark from the application after it was refactored to use Kant:
+
+```ruby
+require 'benchmark'
+u = User.first
+
+puts Benchmark.measure {
+  10000.times { AccessControl.new(u) }
+}
+# => 0.060000   0.010000   0.070000 (  0.169156)
+```
+
+That's a *slight* difference. For us, this translates into a savings of roughly
+50 seconds of CPU time for every 10,000 requests.
+
+**Perform your own benchmarks.**
 
 ## Contributing
 
