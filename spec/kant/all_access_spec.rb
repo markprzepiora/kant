@@ -17,4 +17,8 @@ describe Kant::AllAccess do
 
     expect(all_access.accessible(:foo, scope)).to eq(scope)
   end
+
+  it "has a #user method" do
+    expect(all_access.user).to eq(user)
+  end
 end

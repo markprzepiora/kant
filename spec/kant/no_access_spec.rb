@@ -18,4 +18,8 @@ describe Kant::NoAccess do
 
     expect(no_access.accessible(:foo, scope)).to eq(none)
   end
+
+  it "has a #user method" do
+    expect(no_access.user).to eq(user)
+  end
 end

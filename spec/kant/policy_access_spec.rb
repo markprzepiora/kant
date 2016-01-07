@@ -4,6 +4,12 @@ require 'kant/policy_access'
 describe Kant::PolicyAccess do
   setup_models
 
+  it "has a #user method" do
+    user = User.create!(email: 'foo@bar.com')
+    policy_access = Kant::PolicyAccess.new(user)
+    expect(policy_access.user).to eq(user)
+  end
+
   describe "#can?" do
     let(:user) { User.create!(email: 'foo@bar.com') }
     subject(:policy_access) { Kant::PolicyAccess.new(user) }
