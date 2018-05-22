@@ -10,7 +10,7 @@ module Kant
       true
     end
 
-    def accessible(action, scope)
+    def accessible(action, scope, *rest)
       scope.all
     end
   end

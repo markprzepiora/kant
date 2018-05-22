@@ -10,7 +10,7 @@ module Kant
       false
     end
 
-    def accessible(action, scope)
+    def accessible(action, scope, *rest)
       scope.none
     end
   end
