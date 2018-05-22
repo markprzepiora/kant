@@ -1,4 +1,4 @@
-# Kant v0.0.4
+# Kant v0.0.5
 
 Kant is a tiny authorization library for your Ruby (especially Rails and/or
 ActiveRecord) projects.
