@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'kant/policy_access'
+require 'kant/access_denied'
 
 describe Kant::PolicyAccess do
   setup_models
@@ -99,6 +100,7 @@ describe Kant::PolicyAccess do
 
   describe "#accessible" do
     let(:user) { User.create!(email: 'foo@bar.com') }
+    let(:another_user) { User.create!(email: 'foo@baz.com') }
     subject(:policy_access) { Kant::PolicyAccess.new(user) }
 
     it "delegates to a Policy module" do
@@ -129,6 +131,94 @@ describe Kant::PolicyAccess do
       incomplete_todo = Todo.create!(completed: false)
 
       expect(policy_access.accessible(:read, Todo)).to eq(Todo.none)
+    end
+
+    # The motivation here is that, when performing authorization for "index"
+    # actions, this often involves some context. For example, the user might be
+    # listing all the todos under a particular project (GET /projects/1/todos).
+    # In a lot of cases it might be possible to define an ActiveRecord or SQL
+    # query that describes what records the user can access regardless of
+    # context, but in some cases this might result in a very complicated query.
+    # (Unfortunately, the example below really doesn't really do the motivation
+    # justice.)
+    #
+    # Imagine instead that a user can normally only access their own User
+    # record (the check being `user == me`). However, when the user is part of
+    # a project they can also see other users in the company that the project
+    # is a part of. (For example, so that they can send a DM to a user.)
+    #
+    # - Company
+    #   - has many Projects
+    #     - has many Users
+    #
+    # Imagine what the query would look like to return all the users I can
+    # message...
+    #
+    #     def self.readable_for_messaging(users, me)
+    #       my_companies = Company.joins(:projects).merge(me.projects)
+    #       my_companies_projects = Project.joins(:company).merge(my_companies)
+    #       my_companies_users = User.joins(:projects).merge(my_companies_projects)
+    #       users.merge(my_companies_users)
+    #     end
+    #
+    # Some notes here:
+    #
+    # 1. This honestly isn't such a gross example, in production this logic can
+    #    get much, much worse.
+    # 2. Even so, you can see it gets pretty complicated.
+    # 3. In practice what we have to do after all this is query the resulting
+    #    scope for users in a particular company... which means more gross queries.
+    #
+    # Instead, by having extra params in the *able function, we can specify a
+    # context (typically this will probably match the shape of the endpoint, so
+    # if your endpoint is /companies/1/users then your *able function will
+    # probably take an extra `companies:` param).
+    #
+    #     def self.readable_for_messaging(users, me, company:)
+    #       my_companies = Company.joins(:projects).merge(me.projects)
+    #       if !my_companies.where(id: company.id).any?
+    #         fail Kant::AccessDenied, "no access"
+    #       end
+    #
+    #       users.joins(:projects).where(projects: { company_id: company.id })
+    #     end
+    it "passes along other params to the *able method" do
+      # module TodoPolicy
+      #   def self.readable_as_owner(todos, user, project:)
+      #     if project.owner_id == user.id
+      #       todos.where(project_id: project_id, completed: true)
+      #     else
+      #       fail Kant::AccessDenied, "user does not have access to this project"
+      #     end
+      #   end
+      # end
+      todo_policy = Class.new do
+        define_singleton_method(:readable_as_owner) do |todos, user, project:|
+          if project.owner_id == user.id
+            todos.where(project_id: project.id, completed: true)
+          else
+            fail Kant::AccessDenied, "user does not have access to this project"
+          end
+        end
+      end
+
+      stub_const("TodoPolicy", todo_policy)
+
+      my_project = Project.create!(owner: user)
+      another_project = Project.create!(owner: another_user)
+      my_complete_todo = Todo.create!(project: my_project, completed: true)
+      my_incomplete_todo = Todo.create!(project: my_project, completed: false)
+      another_complete_todo = Todo.create!(project: another_project, completed: true)
+
+      expect{
+        policy_access.accessible(:read_as_owner, Todo)
+      }.to raise_error(ArgumentError)
+
+      expect(policy_access.accessible(:read_as_owner, Todo, project: my_project)).to eq([my_complete_todo])
+
+      expect{
+        policy_access.accessible(:read_as_owner, Todo, project: another_project)
+      }.to raise_error(Kant::AccessDenied)
     end
   end
 

@@ -37,12 +37,12 @@ module Kant
     #
     #   ability.accessible(:read, Content)
     #   # => a Content scope
-    def accessible(action, scope)
+    def accessible(action, scope, *rest)
       abilities = resolve_scope(scope)
       _scope_method = scope_method(abilities, action)
 
       if _scope_method
-        abilities.send(_scope_method, scope, user)
+        abilities.send(_scope_method, scope, user, *rest)
       else
         scope.none
       end
