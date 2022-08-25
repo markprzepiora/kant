@@ -193,7 +193,8 @@ describe Kant::PolicyAccess do
       #   end
       # end
       todo_policy = Class.new do
-        define_singleton_method(:readable_as_owner) do |todos, user, project: nil|
+        define_singleton_method(:readable_as_owner) do |todos, user, options = {}|
+          project = options[:project]
           fail ArgumentError if !project
 
           if project.owner_id == user.id
