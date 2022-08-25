@@ -1,4 +1,4 @@
-# Kant v0.0.5 [![Build Status](https://travis-ci.org/markprzepiora/kant.svg?branch=master)](https://travis-ci.org/markprzepiora/kant)
+# Kant v0.0.6 [![Build Status](https://travis-ci.org/markprzepiora/kant.svg?branch=master)](https://app.travis-ci.com/github/markprzepiora/kant)
 
 Kant is a tiny authorization library for your Ruby (especially Rails and/or
 ActiveRecord) projects.
